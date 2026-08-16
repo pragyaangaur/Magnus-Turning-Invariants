@@ -266,3 +266,49 @@ def fig_shape_and_3d(v0, theta, p):
     return dict(rms_circle_m=rms, R_fit_m=Rfit, R_ratio=float(Rh.max() / Rh.min()),
                 sec_theta=float(1 / np.cos(theta)), y_end=Y[:, -1], pair=pair,
                 t_s=r["t_height_s"])
+
+
+# ---------------------------------------------------------------- reduced-model figure
+def fig_deficit(mu_grid=None, theta_deg_grid=None):
+    """Three-panel figure for the impossibility result, all from the reduced ODE."""
+    from .reduced import deficit_deg, deficit_grid_deg, solve_lambda, solve_Q
+
+    mu_grid = np.logspace(-2, np.log10(3.0), 60) if mu_grid is None else mu_grid
+    theta_deg_grid = np.linspace(2.0, 88.0, 60) if theta_deg_grid is None else theta_deg_grid
+    D, _ = deficit_grid_deg(np.radians(theta_deg_grid), mu_grid, n_bisect=70)
+
+    fig, ax = plt.subplots(1, 3, figsize=(13.5, 4.0))
+
+    im = ax[0].pcolormesh(theta_deg_grid, mu_grid, D, cmap="magma", shading="nearest",
+                          norm=matplotlib.colors.LogNorm(vmin=max(D.min(), 1e-4), vmax=D.max()))
+    fig.colorbar(im, ax=ax[0], label=r"$90^\circ-\beta$  [deg]")
+    for nm, p in ((n, make_ball(n)) for n in BALLS):
+        ax[0].plot(45.0, p.cd_const / p.cl_const, "w+", ms=7, mew=1.4)
+    ax[0].set(yscale="log", xlabel=r"launch angle $\theta$ [deg]", ylabel=r"$\mu=C_D/C_L$",
+              title="chord-bearing deficit (always $>0$)")
+
+    # panel 2: the folded integrand, showing the pointwise inequality fails
+    for mu, td, c in ((1.0, 45.0, "C0"), (0.5, 45.0, "C1"), (1.5, 30.0, "C2")):
+        th = np.radians(td)
+        u, _, gam = solve_Q(th, solve_lambda(th, mu), mu, n=4001)
+        cg = np.cos(gam)
+        half = (len(u) - 1) // 2 + 1
+        d = cg[:half] - cg[::-1][:half]
+        ax[1].plot(u[:half], d, color=c, label=rf"$\mu$={mu}, $\theta$={td:.0f}$^\circ$")
+    ax[1].axhline(0.0, color="k", lw=0.8)
+    ax[1].set(xlabel=r"$u$ [rad]", ylabel=r"$\cos\gamma(u)-\cos\gamma(\pi-u)$",
+              title="folded integrand changes sign once")
+    ax[1].legend(fontsize=8)
+
+    # panel 3: asymptotic law
+    C = 8.0 / 3.0 - 24.0 / np.pi ** 2
+    mus = np.logspace(-3, -0.5, 12)
+    th = np.radians(0.5)
+    num = [np.radians(deficit_deg(th, m)) / (m * th ** 2) for m in mus]
+    ax[2].semilogx(mus, num, "ko-", ms=3, label="reduced ODE")
+    ax[2].axhline(C, color="r", ls="--", label=r"$8/3-24/\pi^2$")
+    ax[2].set(xlabel=r"$\mu=C_D/C_L$", ylabel=r"$(90^\circ-\beta)/(\mu\theta^2)$  [rad]",
+              title=r"asymptotics as $\mu\to0$")
+    ax[2].legend(fontsize=8)
+    _save(fig, "deficit")
+    return D

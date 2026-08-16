@@ -8,7 +8,7 @@ A thrower at the origin releases two balls simultaneously in opposite horizontal
 
 The drag-free version has an exact and rather elegant solution. The version with air resistance is impossible, and the reason is more interesting than "the ball runs out of speed". Getting there turned up an exactly integrable structure hiding inside a system that the sports-ballistics literature uniformly describes as having no closed-form solution.
 
-Everything below is reproduced by `python run_all.py` and checked by 101 tests.
+Everything below is reproduced by `python run_all.py` and checked by 139 tests. A manuscript version is in [`paper/paper.tex`](paper/paper.tex).
 
 ## Contents
 
@@ -35,7 +35,7 @@ So why is the real ground track not a circle? Gravity, and gravity alone. The ex
 
 Why can a baseball not do this? It needs 884 metres of travel to turn around, but drag kills it after roughly 200 metres. It manages about half a turn. You would need to throw at Mach 1.8.
 
-And the deepest reason the collision fails once you allow air resistance: a ball with drag always comes down more steeply than it went up, because its horizontal speed decays without limit while its falling speed is capped at terminal velocity. That asymmetry tilts the finish line, and the two balls sail past each other.
+And the reason the collision fails once you allow air resistance: a ball with drag lands more steeply than it was thrown, because its horizontal speed decays without limit while its falling speed is capped at terminal velocity. That asymmetry tilts the finish line off square, and the two balls sail past each other. The full accounting is subtler than "steeper everywhere" (see the analytic section below, where that tempting shortcut turns out to be false), but the tilt is real and always in the same direction.
 
 ## The model
 
@@ -234,13 +234,15 @@ Now change the independent variable from time to arc length via $`ds = \lvert\ma
 \frac{dw}{ds} = \bigl(i k_L - k_D\bigr)\,w \qquad\Longrightarrow\qquad {\;w(s) = w_0\,e^{-(k_D - i k_L)\,s}\;}
 ```
 
-A nine-dimensional nonlinear system has an exact closed-form solution for its horizontal part, and gravity never enters it. This is the engine behind every result in this section. It also reduces the whole problem to a single scalar ODE in arc length, since with $`w(s)`$ known everything else follows from
+A nine-dimensional nonlinear system has an exact closed-form solution for its horizontal part, and gravity never enters it. This is the engine behind every result in this section.
+
+It also reduces the whole problem to a **single scalar ODE**. Taking the turn angle $`u=\psi`$ as independent variable and $`Q=\tan\gamma`$ with $`\gamma`$ the flight-path angle,
 
 ```math
-\frac{dv_z}{ds} + k_D v_z = \frac{-g}{\sqrt{\lvert w_0\rvert^2 e^{-2k_D s} + v_z^2}}
+\frac{dQ}{du} = -\lambda\,\frac{e^{2\mu u}}{\sqrt{1+Q^2}},\qquad Q(0)=\tan\theta,\qquad \lambda=\frac{g L_L}{v_0^2\cos^2\theta},\qquad \mu=\frac{C_D}{C_L}
 ```
 
-whose drag-free limit is separable and reproduces the classical parabola arc-length formula.
+Two parameters, one equation. It reproduces $`\gamma(\psi)`$ from the full 3-D integration to better than $`10^{-8}`$ rad. Return to launch height is $`\int_0^\pi\sin\gamma\,du=0`$ and the chord is $`\int_0^\pi\cos\gamma\,e^{iu}du/k_L`$, both exact. Because closure fixes $`\lambda`$ once $`(\mu,\theta)`$ are given, the chord bearing is a function of $`(\mu,\theta)`$ **alone**: that scaling, observed numerically earlier, is now a theorem. At $`\mu=0`$ the equation is separable and gives $`\lambda=[\tan\theta\sec\theta+\operatorname{arcsinh}\tan\theta]/\pi`$, which reproduces $`v_0=\sqrt{\pi g L_L/f(\theta)}`$ exactly.
 
 ### The exponential formula was right, attached to the wrong quantity
 
@@ -312,7 +314,13 @@ that is, if and only if the positive weight $`\rho`$ is balanced about $`u = \pi
 
 **Drag-free**, $`\mu = 0`$ so $`\rho = 1/\lvert\mathbf{v}\rvert`$, the apex sits exactly at $`\psi = \pi/2`$, and $`\lvert\mathbf{v}\rvert`$ is symmetric about it. The weight is symmetric, $`\cos u`$ is antisymmetric, and the integral vanishes identically. The chord is exactly perpendicular to the launch direction, measured at $`90.000000^\circ`$ for every launch angle. This is precisely the condition that makes the mirror image of ball A's launch anti-parallel to it, which is why the two balls can be thrown in opposite directions and still meet.
 
-**With drag** the balance breaks, and always in the same direction. Folding the integral about $`u = \pi/2`$, the sign is set by comparing descent steepness against ascent steepness at matched turn angle, $`\lvert\gamma(\pi - u)\rvert`$ versus $`\lvert\gamma(u)\rvert`$. Horizontal speed decays exponentially with no floor, while descent speed is capped at terminal velocity, so the descent is always steeper, the integral is strictly positive, and the chord tips **below** perpendicular:
+**With drag** the balance breaks, and always in the same direction, though not for the reason an earlier version of this README gave. Folding the integral about $`u=\pi/2`$ turns the sign into a comparison of descent steepness against ascent steepness at matched turn angle, $`\lvert\gamma(\pi-u)\rvert`$ versus $`\lvert\gamma(u)\rvert`$, and it is tempting to claim the descent is always steeper so the bracket is positive pointwise. **That claim is wrong.** Drag makes the ascending arc longer than the descending one, so the apex sits at a turn angle *greater* than $`\pi/2`$ (measured: $`0.543\pi`$, $`0.572\pi`$, $`0.635\pi`$). For $`u`$ slightly below $`\pi/2`$ both $`u`$ and $`\pi-u`$ then lie on the ascent and the ordering reverses, so the folded integrand changes sign exactly once. Positivity of the integral is genuinely an integral statement: a large positive contribution near launch outweighs a smaller negative one near the midpoint. What *is* proved, by perturbation theory in the reduced equation, is the leading behaviour
+
+```math
+90^\circ - \beta \;=\; \Bigl(\tfrac{8}{3}-\tfrac{24}{\pi^2}\Bigr)\,\mu\,\theta^2 \;+\; O(\mu^2,\theta^4)
+```
+
+in radians, whose coefficient is positive **if and only if $`\pi^2 > 9`$**. The analytic constant $`0.2349583`$ is reproduced by Richardson extrapolation of the numerics to $`7\times10^{-6}`$ relative. Beyond that regime the deficit is established numerically, and is strictly positive over a $`60\times60`$ grid spanning $`10^{-2}\le\mu\le3`$ and $`2^\circ\le\theta\le88^\circ`$ (minimum $`1.67\times10^{-4}`$ deg). A proof for all $`(\mu,\theta)`$ remains open. Measured bearings:
 
 | ball | $`\mu`$ | bearing at $`10^\circ`$ | $`30^\circ`$ | $`60^\circ`$ | $`85^\circ`$ |
 |---|---|---|---|---|---|
@@ -418,7 +426,7 @@ Nothing was tuned, clamped or regularised to make any of these agree. Every solv
 ```bash
 pip install -r requirements.txt
 python run_all.py        # writes figures/*.pdf and results.json, prints every number above
-python -m pytest -q      # 101 regression tests
+python -m pytest -q      # 139 regression tests
 ```
 
 `run_all.py` takes a few minutes, dominated by the $`\mathrm{rtol} = 10^{-10}`$ event-detected solves in the parameter scans.
@@ -426,14 +434,17 @@ python -m pytest -q      # 101 regression tests
 ## Repository layout
 
 ```
+paper/paper.tex    manuscript (REVTeX 4.2), compiles with latexmk -pdf
+paper/refs.bib     bibliography, every entry checked against the publisher record
 src/model.py       Params dataclass, coefficient models, batched right-hand side
 src/integrate.py   RK45 with event detection, batched fixed-step RK4, crossing refinement
 src/solve.py       closure root-finding, rank-deficiency diagnostic, feasibility scans
 src/theory.py      the exact analytic structure and the asymmetric-collision solver
+src/reduced.py     reduction to one scalar ODE in the turn angle, and the deficit map
 src/sweep.py       symmetry checks, vectorised feasibility map, shape analysis, figures
 run_all.py         driver: runs everything and writes figures/ and results.json
-tests/             101 regression tests at machine-precision tolerances
-figures/           five PDF figures, matplotlib only, no seaborn styling
+tests/             139 regression tests at machine-precision tolerances
+figures/           six PDF figures, matplotlib only, no seaborn styling
 ```
 
 Source is 771 lines across `src/`, of which roughly 130 are matplotlib figure code and about 400 are the physics and solvers.

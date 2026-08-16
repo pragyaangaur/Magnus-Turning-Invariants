@@ -5,3 +5,16 @@ __pycache__/
 venv/
 results.json
 .DS_Store
+
+# LaTeX build artifacts
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.bbl
+paper/*.blg
+paper/*.fls
+paper/*.fdb_latexmk
+paper/*.synctex.gz
+paper/*.Notes.bib
+paper/build.log
+paper/paperNotes.bib
