@@ -2,13 +2,9 @@
 
 **Full title: Exact Arc-Length Reduction for Projectile Motion under Quadratic Drag and a Vertical-Axis Magnus Force, with a Non-Existence Result for the Symmetric Two-Ball Rendezvous**
 
-Suggested repository slug: `magnus-turning-invariants`
-
 A thrower at the origin releases two balls simultaneously in opposite horizontal directions, each spinning about a vertical axis, one about $`+\hat{z}`$ and one about $`-\hat{z}`$. Under gravity, quadratic drag and the Magnus force, can the two balls curve around and collide head-on at the height they were released, each having turned exactly $`180^\circ`$ in azimuth?
 
 The drag-free version has an exact and rather elegant solution. The version with air resistance is impossible, and the reason is more interesting than "the ball runs out of speed". Getting there turned up an exactly integrable structure hiding inside a system that the sports-ballistics literature uniformly describes as having no closed-form solution.
-
-Everything below is reproduced by `python run_all.py` and checked by 139 tests. A manuscript version is in [`paper/paper.tex`](paper/paper.tex).
 
 ## Contents
 
@@ -399,7 +395,17 @@ One caveat remains. The full text of McCoy's monograph and of several paywalled 
 
 ### Sources
 
-[Bray and Kerwin, Modelling the flight of a soccer ball in a direct free kick](https://people.stfx.ca/smackenz/courses/hk474/labs/jump%20float%20lab/bray%202002%20modelling%20the%20flight%20of%20a%20soccer%20ball%20in%20a%20direct%20free%20kick.pdf) · [Nathan, The effect of spin on the flight of a baseball, Am. J. Phys. 76, 119 (2008)](https://baseball.physics.illinois.edu/ajpfeb08.pdf) · [Exact and approximate solutions to projectile motion in air incorporating Magnus effect, EPJ Plus (2020)](https://link.springer.com/article/10.1140/epjp/s13360-020-00593-4) · [Study of the asymptotic motion of a sporting projectile taking into account the Magnus force, arXiv:2409.15110](https://arxiv.org/abs/2409.15110) · [An analytic solution to the equations governing the motion of a point mass with quadratic resistance, arXiv:1305.1283](https://arxiv.org/pdf/1305.1283) · [McCoy, Modern Exterior Ballistics, full text](https://archive.org/stream/ModernExteriorBallisticsTheLaunchAndFlightDynamicsOfSymmetricProjectiles2ndEd.R.McCoy/Modern+Exterior+Ballistics+-+The+Launch+and+Flight+Dynamics+of+Symmetric+Projectiles+2nd+ed.+-+R.+McCoy_djvu.txt) · [Magnus force in superfluids and superconductors, Phys. Rev. B 55, 485 (1997)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.55.485) · [Price, A Coriolis tutorial (WHOI)](https://www2.whoi.edu/staff/jprice/wp-content/uploads/sites/199/2019/01/aCt_2003.pdf) · [Turning flight performance notes, Virginia Tech](https://archive.aoe.vt.edu/lutze/AOE3104/turningflight.pdf) · [Accelerated performance and turns, Engineering LibreTexts](https://eng.libretexts.org/Bookshelves/Aerospace_Engineering/Aerodynamics_and_Aircraft_Performance_3e_(Marchman)/08:_Accelerated_Performance-_Turns) · [A review of the analysis of wind-influenced projectile motion, Lubarda (UCSD)](http://maeresearch.ucsd.edu/~vlubarda/research/pdfpapers/AAM22.pdf)
+- [Bray and Kerwin, *Modelling the flight of a soccer ball in a direct free kick*](https://people.stfx.ca/smackenz/courses/hk474/labs/jump%20float%20lab/bray%202002%20modelling%20the%20flight%20of%20a%20soccer%20ball%20in%20a%20direct%20free%20kick.pdf)
+- [Nathan, *The effect of spin on the flight of a baseball*, Am. J. Phys. 76, 119 (2008)](https://baseball.physics.illinois.edu/ajpfeb08.pdf)
+- [*Exact and approximate solutions to projectile motion in air incorporating Magnus effect*, EPJ Plus (2020)](https://link.springer.com/article/10.1140/epjp/s13360-020-00593-4)
+- [*Study of the asymptotic motion of a sporting projectile taking into account the Magnus force*, arXiv:2409.15110](https://arxiv.org/abs/2409.15110)
+- [*An analytic solution to the equations governing the motion of a point mass with quadratic resistance*, arXiv:1305.1283](https://arxiv.org/pdf/1305.1283)
+- [McCoy, *Modern Exterior Ballistics*, full text](https://archive.org/stream/ModernExteriorBallisticsTheLaunchAndFlightDynamicsOfSymmetricProjectiles2ndEd.R.McCoy/Modern+Exterior+Ballistics+-+The+Launch+and+Flight+Dynamics+of+Symmetric+Projectiles+2nd+ed.+-+R.+McCoy_djvu.txt)
+- [*Magnus force in superfluids and superconductors*, Phys. Rev. B 55, 485 (1997)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.55.485)
+- [Price, *A Coriolis tutorial* (WHOI)](https://www2.whoi.edu/staff/jprice/wp-content/uploads/sites/199/2019/01/aCt_2003.pdf)
+- [*Turning flight performance notes*, Virginia Tech](https://archive.aoe.vt.edu/lutze/AOE3104/turningflight.pdf)
+- [*Accelerated performance and turns*, Engineering LibreTexts](https://eng.libretexts.org/Bookshelves/Aerospace_Engineering/Aerodynamics_and_Aircraft_Performance_3e_(Marchman)/08:_Accelerated_Performance-_Turns)
+- [Lubarda, *A review of the analysis of wind-influenced projectile motion* (UCSD)](http://maeresearch.ucsd.edu/~vlubarda/research/pdfpapers/AAM22.pdf)
 
 ## Summary of results
 
@@ -446,5 +452,3 @@ run_all.py         driver: runs everything and writes figures/ and results.json
 tests/             139 regression tests at machine-precision tolerances
 figures/           six PDF figures, matplotlib only, no seaborn styling
 ```
-
-Source is 771 lines across `src/`, of which roughly 130 are matplotlib figure code and about 400 are the physics and solvers.
