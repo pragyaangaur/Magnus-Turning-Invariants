@@ -1,8 +1,9 @@
-"""Driver: runs every task, writes figures/*.pdf and dumps the numbers for results.md."""
+"""Driver: reproduces every number in the README and writes figures/*.pdf."""
 import json
 import numpy as np
 
-from src.model import make_ball, initial_state, v0_closed_form, BALLS, rhs
+from src.model import (make_ball, initial_state, v0_closed_form, BALLS, rhs,
+                       ballistic_arc_length_m)
 from src.integrate import fly, DivergedError
 from src.solve import solve_v0, residual_1d, closure_report, solve_2d, SPIN_RAD_PER_S
 from src import sweep
@@ -15,8 +16,8 @@ def sec(t):
     print("\n" + "=" * 72 + f"\n{t}\n" + "=" * 72)
 
 
-# ---------------- Task 1
-sec("TASK 1  analytic claims (drag OFF, const C_L, no spin decay)")
+# ---------------- Invariants
+sec("INVARIANTS  (drag OFF, const C_L, no spin decay)")
 ideal = make_ball("baseball", drag_on=False)
 kL = ideal.k_lift_per_m
 print(f"k_L = {kL:.12e} 1/m   L_L = {ideal.lift_length_m:.6f} m   pi*L_L = {np.pi*ideal.lift_length_m:.6f} m")
@@ -41,10 +42,10 @@ for v0 in np.linspace(10, 120, 12):
     for td in np.linspace(5, 85, 9):
         th = np.radians(td)
         r = fly(initial_state(v0, th, SPIN_RAD_PER_S), ideal, t_max_s=2000.0, stop_on="height")
-        worst_c = max(worst_c, abs(r["y_height"][10] / sweep.ballistic_arc_length_m(v0, th, ideal.g_m_per_s2) - 1.0))
+        worst_c = max(worst_c, abs(r["y_height"][10] / ballistic_arc_length_m(v0, th, ideal.g_m_per_s2) - 1.0))
 print(f"(c) max relative deviation of ballistic arc length from closed form : {worst_c:.3e}")
-OUT["task1"] = dict(a=worst_a, b=worst_b, c=worst_c, kL=kL, L_L=ideal.lift_length_m)
-sweep.fig_task1(ideal)
+OUT["invariants"] = dict(a=worst_a, b=worst_b, c=worst_c, kL=kL, L_L=ideal.lift_length_m)
+sweep.fig_invariants(ideal)
 
 # drag-on bonus check
 p_bb = make_ball("baseball")
@@ -52,11 +53,11 @@ r = fly(initial_state(60.0, np.radians(40.0), SPIN_RAD_PER_S), p_bb, t_max_s=900
 d = rhs(0.0, r["sol"].sol(np.linspace(0, r["t_psi_s"], 2000)), p_bb)
 extra = np.abs(d[9] / d[10] / p_bb.k_lift_per_m - 1.0).max()
 print(f"    bonus: with DRAG ON, dpsi/ds still equals k_L to {extra:.3e}")
-OUT["task1"]["a_with_drag"] = extra
+OUT["invariants"]["a_with_drag"] = extra
 
 
-# ---------------- Task 2
-sec("TASK 2  closure problem")
+# ---------------- Closure Of A 180 Degree Turn
+sec("CLOSURE OF A 180 DEGREE TURN")
 print("ideal (drag off): theta is free, 1D solve for v0")
 tbl = []
 for td in [15, 30, 45, 60, 75, 85]:
@@ -65,7 +66,7 @@ for td in [15, 30, 45, 60, 75, 85]:
     cf = float(v0_closed_form(th, ideal))
     tbl.append((td, v0, cf, abs(v0 / cf - 1)))
     print(f"   theta={td:2d}deg  v0_num={v0:9.5f}  v0_closedform={cf:9.5f}  rel diff={abs(v0/cf-1):.2e}")
-OUT["task2_ideal"] = tbl
+OUT["closure_ideal"] = tbl
 
 print("\n2D system on (v0, theta) -- Jacobian singular values at the converged point:")
 sol2, J, sv = solve_2d(tbl[2][1], np.radians(45.0), ideal)
@@ -73,7 +74,7 @@ print(f"   residual at solution = {sol2.fun},  x = {sol2.x}")
 print(f"   J =\n{J}")
 print(f"   singular values = {sv},  ratio = {sv.min()/sv.max():.3e}")
 print("   -> rank 1: F1 and F2 encode the SAME scalar condition, so the zero set is a curve.")
-OUT["task2_svd"] = dict(sv=sv.tolist(), ratio=float(sv.min() / sv.max()))
+OUT["closure_svd"] = dict(sv=sv.tolist(), ratio=float(sv.min() / sv.max()))
 
 print("\ndrag ON, baseball:")
 try:
@@ -96,7 +97,7 @@ print(f"   min |R| over 20<=v0<=150, 10<=theta<=88 : {abs(P[i,j]):.5f} rad "
       f"({abs(P[i,j])/np.pi:.4f} pi short) at v0={vg[i]:.2f} m/s, theta={np.degrees(tg[j]):.2f} deg")
 print(f"   psi_max attained = {P[i,j]+np.pi:.5f} rad = {(P[i,j]+np.pi)/np.pi:.4f} pi")
 print("   F1 = z(t_psi) - z_launch is UNDEFINED here: the psi=pi event never fires at all.")
-OUT["task2_drag_baseball"] = dict(min_absR=float(abs(P[i, j])), v0=float(vg[i]),
+OUT["closure_drag_baseball"] = dict(min_absR=float(abs(P[i, j])), v0=float(vg[i]),
                                   theta_deg=float(np.degrees(tg[j])),
                                   psi_max_over_pi=float((P[i, j] + np.pi) / np.pi))
 
@@ -104,11 +105,11 @@ OUT["task2_drag_baseball"] = dict(min_absR=float(abs(P[i, j])), v0=float(vg[i]),
 th85 = np.radians(85.0)
 v0_root = solve_v0(th85, p_bb, v0_cap_m_per_s=5000.0)
 print(f"   the root does exist, but at v0 = {v0_root:.1f} m/s (theta=85deg) -- Mach {v0_root/343:.1f}.")
-OUT["task2_drag_baseball"]["root_v0"] = float(v0_root)
+OUT["closure_drag_baseball"]["root_v0"] = float(v0_root)
 
 
-# ---------------- Task 3
-sec("TASK 3  symmetry")
+# ---------------- Mirror Symmetry And Throw Tolerance
+sec("MIRROR SYMMETRY AND THROW TOLERANCE")
 v0i, thi = solve_v0(np.radians(45.0), ideal), np.radians(45.0)
 p_sat = make_ball("baseball", drag_on=False, cl_model="saturating")
 base, rows = sweep.symmetry_table(v0i, thi, ideal, p_spin=p_sat)
@@ -122,8 +123,8 @@ print(f"   chord |OP| = {chord:.6f} m, launch->meeting bearing = "
       f"{np.degrees(np.arctan2(P_end[1], P_end[0])):.6f} deg (launch bearing 0 deg)")
 print(f"   |v_f| = {base['vfA_m_per_s']:.6f}, closing speed = {base['closing_speed_m_per_s']:.6f}, "
       f"ratio = {base['closing_speed_m_per_s']/base['vfA_m_per_s']:.12f}")
-print("   claimed ratio was 2; the vertical velocities are COMMON mode (both descending)")
-print("   and cancel in the difference, so the true law is 2*cos(theta):")
+print("   the ratio is NOT 2: the vertical velocities are common mode (both balls")
+print("   descending) and cancel in the difference, so the law is 2*cos(theta):")
 for td in [10.0, 30.0, 45.0, 60.0, 80.0]:
     th = np.radians(td)
     b = sweep.mirror_pair(solve_v0(th, ideal, v0_cap_m_per_s=1000.0), th, ideal)
@@ -138,14 +139,14 @@ per = []
 for nm, d, _pp in rows:
     print(f"   {nm:32s} miss = {d['miss_m']:9.4f} m   dt = {d['dt_s']:.4e} s")
     per.append((nm, d["miss_m"], d["dt_s"]))
-OUT["task3"] = dict(miss=base["miss_m"], dt=base["dt_s"], state_pos_err=pe, state_vel_err=ve,
+OUT["symmetry"] = dict(miss=base["miss_m"], dt=base["dt_s"], state_pos_err=pe, state_vel_err=ve,
                     closing_ratio=base["closing_speed_m_per_s"] / base["vfA_m_per_s"],
                     meeting=[float(x) for x in P_end[0:3]], perturbed=per,
                     v0=v0i, chord=chord, R=chord / 2)
 
 
-# ---------------- Task 4
-sec("TASK 4  feasibility map")
+# ---------------- Feasibility Map
+sec("FEASIBILITY MAP")
 cl_cd = np.logspace(np.log10(0.2), np.log10(20.0), 90)
 loading = np.logspace(np.log10(1.0), np.log10(400.0), 90)
 psi_max, vf_close, (vhat, G_of_vhat, best_th, VF_of_vhat) = sweep.feasibility_map(cl_cd, loading)
@@ -158,12 +159,12 @@ print("boundary C_L/C_D = pi/G, so it sits at pi only where the path is exactly 
 for gv in [0.5, 1.0, 2.0, 4.0, 8.0]:
     vv = np.interp(gv, G_of_vhat, vhat)
     print(f"   G={gv:4.1f} -> C_L/C_D boundary = {np.pi/gv:6.3f}, needs v0/vt = {vv:6.2f}")
-print("\nresidual speed law  v_f/v_0 = exp(-pi C_D/C_L):")
+print("\nresidual TOTAL speed vs exp(-pi C_D/C_L), which is exact only for horizontal speed:")
 for rr in [0.5, 1.0, 2.0, 3.0, 5.0, 10.0]:
     pred = np.exp(-np.pi / rr)
     simv = float(np.interp(rr, Rgrid, vf_sim))
-    print(f"   C_L/C_D={rr:5.1f}   predicted {pred:.4f}   simulated {simv:.4f}   ratio {simv/pred:.3f}")
-OUT["task4"] = dict(G_max=float(G_of_vhat[-1]),
+    print(f"   C_L/C_D={rr:5.1f}   exp(-pi C_D/C_L) {pred:.4f}   simulated {simv:.4f}   ratio {simv/pred:.3f}")
+OUT["feasibility"] = dict(G_max=float(G_of_vhat[-1]),
                     vf_law=[(float(rr), float(np.exp(-np.pi / rr)),
                              float(np.interp(rr, Rgrid, vf_sim))) for rr in [0.5, 1, 2, 3, 5, 10]])
 
@@ -195,13 +196,13 @@ for nm in BALLS:
 OUT["balls"] = ball_rows
 
 
-# ---------------- Task 5
-sec("TASK 5  shape")
+# ---------------- Ground-Track Shape
+sec("GROUND-TRACK SHAPE")
 sh = sweep.fig_shape_and_3d(v0i, thi, ideal)
 print(f"ideal, theta=45deg: circle fit R={sh['R_fit_m']:.4f} m, RMS residual={sh['rms_circle_m']:.4f} m "
       f"({100*sh['rms_circle_m']/sh['R_fit_m']:.3f}% of R)")
 print(f"   radius of curvature ratio max/min = {sh['R_ratio']:.6f}   sec(theta) = {sh['sec_theta']:.6f}")
-OUT["task5"] = dict(R_fit=sh["R_fit_m"], rms=sh["rms_circle_m"],
+OUT["shape"] = dict(R_fit=sh["R_fit_m"], rms=sh["rms_circle_m"],
                     ratio=sh["R_ratio"], sec_theta=sh["sec_theta"])
 for td in [20.0, 45.0, 70.0]:
     th = np.radians(td)

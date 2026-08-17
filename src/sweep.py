@@ -11,7 +11,7 @@ from .solve import SPIN_RAD_PER_S
 FIG = "figures"
 
 
-# ---------------------------------------------------------------- Task 3
+# ---------------------------------------------------------------- mirror symmetry
 def mirror_pair(v0, theta, p, spin=SPIN_RAD_PER_S, dv0=0.0, dazi_rad=0.0, dspin=0.0):
     """Ball A at azimuth 0 with +z spin; ball B at azimuth pi with -z spin.
 
@@ -69,7 +69,7 @@ def symmetry_table(v0, theta, p, p_spin=None):
     return base, rows
 
 
-# ---------------------------------------------------------------- Task 4
+# ---------------------------------------------------------------- feasibility map
 def dimensionless_flight_grid(vhat_grid, theta_grid, n_steps=4000):
     """One batched RK4 over the whole (v0/vt, theta) grid.
 
@@ -133,12 +133,12 @@ def ball_points(rho=1.225):
     for name in BALLS:
         p = make_ball(name)
         pts[name] = (p.cl_const / p.cd_const, p.mass_kg / (p.cl_const * p.area_m2))
-    p = make_ball("frisbee")   # effective C_L/C_D ~ 3 per the brief
+    p = make_ball("frisbee")   # frisbee uses an effective C_L/C_D ~ 3
     pts["frisbee"] = (3.0, p.mass_kg / (p.cl_const * p.area_m2))
     return pts
 
 
-# ---------------------------------------------------------------- Task 5
+# ---------------------------------------------------------------- ground-track shape
 def fit_circle(x, y):
     """Algebraic (Kasa) circle fit.  Returns (xc, yc, R, rms_residual)."""
     A = np.column_stack([x, y, np.ones_like(x)])
@@ -167,7 +167,7 @@ def _save(fig, name):
     plt.close(fig)
 
 
-def fig_task1(p_ideal):
+def fig_invariants(p_ideal):
     kL, LL = p_ideal.k_lift_per_m, p_ideal.lift_length_m
     fig, ax = plt.subplots(1, 2, figsize=(10, 4))
     for v0, td in [(30, 25), (60, 45), (100, 70)]:
@@ -189,7 +189,7 @@ def fig_task1(p_ideal):
               title=r"(b) $S_{tot}=\pi L_L$, independent of $v_0,\theta$")
     for a in ax:
         a.legend(fontsize=8)
-    _save(fig, "task1_invariants")
+    _save(fig, "invariants")
 
 
 def fig_feasibility(psi_max, vf_close, cl_cd, loading, pts):
@@ -212,7 +212,7 @@ def fig_feasibility(psi_max, vf_close, cl_cd, loading, pts):
     ax[0].clabel(cs, fmt=r"$\psi_{max}=\pi$")
     ax[0].axhline(np.pi, color="r", ls="--", lw=1, label=r"predicted boundary $C_L/C_D=\pi$")
     ax[0].legend(fontsize=8, loc="upper right")
-    _save(fig, "task4_feasibility")
+    _save(fig, "feasibility")
 
 
 def fig_vf_law(vhat, G_of_vhat, VF_of_vhat):
@@ -226,7 +226,7 @@ def fig_vf_law(vhat, G_of_vhat, VF_of_vhat):
     ax.set_xlabel(r"$C_L/C_D$"); ax.set_ylabel(r"$v_f/v_0$")
     ax.set_xscale("log"); ax.legend(); ax.grid(alpha=0.3)
     ax.set_title("residual speed law")
-    _save(fig, "task4_vf_law")
+    _save(fig, "residual_speed")
     return R, vf_sim
 
 
@@ -248,7 +248,7 @@ def fig_shape_and_3d(v0, theta, p):
     ax[1].set(xlabel="path length $s$ [m]", ylabel="ground-track radius of curvature [m]",
               title=f"$R_{{max}}/R_{{min}}$={Rh.max()/Rh.min():.4f} "
                     f"($\\sec\\theta$={1/np.cos(theta):.4f})")
-    _save(fig, "task5_shape")
+    _save(fig, "ground_track")
 
     pair = mirror_pair(v0, theta, p)
     fig = plt.figure(figsize=(6.5, 5))
@@ -262,7 +262,7 @@ def fig_shape_and_3d(v0, theta, p):
     ax3.scatter([P[0]], [P[1]], [P[2]], color="r", s=40)
     ax3.set(xlabel="x [m]", ylabel="y [m]", zlabel="z [m]",
             title="trajectory pair and collision point")
-    _save(fig, "task5_pair3d")
+    _save(fig, "trajectory_pair")
     return dict(rms_circle_m=rms, R_fit_m=Rfit, R_ratio=float(Rh.max() / Rh.min()),
                 sec_theta=float(1 / np.cos(theta)), y_end=Y[:, -1], pair=pair,
                 t_s=r["t_height_s"])

@@ -29,11 +29,12 @@ def residual_1d(v0, theta, p, spin=SPIN_RAD_PER_S):
 
 
 def residuals_2d(u, p, spin=SPIN_RAD_PER_S):
-    """The user's 2-component system, evaluated at the two event times.
+    """The naive 2-component closure system, evaluated at the two event times.
 
     F1 = z(t_psi) - z_launch,  F2 = psi(t_height) - pi.
     Both vanish iff t_height == t_psi, so the two rows are not independent -- see
-    the Jacobian singular values reported by solve_2d.
+    the Jacobian singular values reported by solve_2d.  Kept because the rank
+    deficiency is itself a reported result.
     """
     v0, theta = u
     first = _flight(v0, theta, p, spin)

@@ -1,4 +1,4 @@
-"""Regression tests for the Task 3 / Task 5 findings, including two refuted claims."""
+"""Regression tests for the mirror symmetry and the ground-track shape."""
 import numpy as np
 import pytest
 
@@ -48,7 +48,7 @@ def test_closing_speed_is_2cos_theta_not_2(ideal, td):
     ratio = b["closing_speed_m_per_s"] / b["vfA_m_per_s"]
     assert abs(ratio / (2.0 * np.cos(th)) - 1.0) < 1e-9
     if td > 1.0:
-        assert abs(ratio - 2.0) > 1e-3      # the claimed value is genuinely wrong
+        assert abs(ratio - 2.0) > 1e-3      # genuinely differs from the naive 2
 
 
 def test_spin_magnitude_is_inert_under_constant_cl(ideal):
@@ -80,7 +80,7 @@ def test_curvature_ratio_is_sec_theta(ideal, td):
 
 
 def test_ground_track_is_not_a_circle(ideal):
-    """REFUTES nothing -- confirms the user's claim that the track is an oval."""
+    """The ground track is an oval, not a circle: the departure is resolvable."""
     th = np.radians(45.0)
     v0 = solve_v0(th, ideal, v0_cap_m_per_s=1000.0)
     r = fly(initial_state(v0, th, SPIN), ideal,

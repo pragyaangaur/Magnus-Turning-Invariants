@@ -17,7 +17,7 @@ Everything below is reproduced by `python run_all.py` and checked by 139 tests. 
 3. [Results](#results)
 4. [The analytic structure](#the-analytic-structure)
 5. [Novelty check](#novelty-check)
-6. [Scorecard](#scorecard)
+6. [Summary of results](#summary-of-results)
 7. [Running it](#running-it)
 8. [Repository layout](#repository-layout)
 
@@ -33,9 +33,9 @@ Where does air resistance fit in? Drag is a brake, not a steering input. It push
 
 So why is the real ground track not a circle? Gravity, and gravity alone. The exact rule is $`R = L_L\cos\gamma`$, where $`\gamma`$ is how steeply the ball is climbing or diving. A steep climb means a tight turn, and flat at the top of the arc means the widest turn. That is why the track is an oval rather than a circle, and why the ratio of widest to tightest turn comes out at exactly $`\sec\theta`$.
 
-Why can a baseball not do this? It needs 884 metres of travel to turn around, but drag kills it after roughly 200 metres. It manages about half a turn. You would need to throw at Mach 1.8.
+Why can a baseball not do this? It needs 884 metres of travel to turn around, but drag kills it after roughly 200 metres. It manages about half a turn. Closing the loop would require a launch speed of Mach 1.8.
 
-And the reason the collision fails once you allow air resistance: a ball with drag lands more steeply than it was thrown, because its horizontal speed decays without limit while its falling speed is capped at terminal velocity. That asymmetry tilts the finish line off square, and the two balls sail past each other. The full accounting is subtler than "steeper everywhere" (see the analytic section below, where that tempting shortcut turns out to be false), but the tilt is real and always in the same direction.
+And the reason the collision fails once air resistance is admitted: a ball with drag lands more steeply than it was thrown, because its horizontal speed decays without limit while its falling speed is capped at terminal velocity. That asymmetry tilts the finish line off square, and the two balls sail past each other. The full accounting is subtler than "steeper everywhere" (see the analytic section below, where that tempting shortcut turns out to be false), but the tilt is real and always in the same direction.
 
 ## The model
 
@@ -59,11 +59,11 @@ The azimuth $`\psi`$ is carried as a state variable and integrated directly from
 
 ## Results
 
-### The three analytic claims all survive
+### Three exact invariants, verified
 
 With drag off, constant $`C_L`$, no spin decay:
 
-| claim | max relative deviation | verdict |
+| invariant | max relative deviation | status |
 |---|---|---|
 | $`d\psi/ds = k_L`$, constant along the path | $`4.44\times10^{-16}`$ | holds to machine precision |
 | $`S_{\text{tot}} = \pi/k_L`$, independent of $`v_0`$ and $`\theta`$ (12 by 9 sweep) | $`1.11\times10^{-15}`$ | holds to machine precision |
@@ -71,9 +71,9 @@ With drag off, constant $`C_L`$, no spin decay:
 
 For a baseball at $`C_L = 0.20`$: $`k_L = 3.555331739605\times10^{-3}\ \mathrm{m}^{-1}`$, $`L_L = 281.2677\ \mathrm{m}`$, $`\pi L_L = 883.6286\ \mathrm{m}`$.
 
-Two of these are stronger than claimed: **they also hold with drag switched on**. Drag is antiparallel to $`\mathbf{v}`$, so its contribution to $`v_x a_y - v_y a_x`$ is identically zero and it cannot torque the azimuth. Measured with drag on, $`d\psi/ds = k_L`$ to $`6.66\times10^{-16}`$. The invariant $`S_{\text{tot}} = \pi L_L`$ is therefore not a drag-free curiosity, it is exact for any constant-$`C_L`$ model with a vertical spin axis. That is what makes the closure problem tractable, because the azimuth condition collapses to a pure path-length condition.
+Two of these are stronger than they first appear: **they also hold with drag switched on**. Drag is antiparallel to $`\mathbf{v}`$, so its contribution to $`v_x a_y - v_y a_x`$ is identically zero and it cannot torque the azimuth. Measured with drag on, $`d\psi/ds = k_L`$ to $`6.66\times10^{-16}`$. The invariant $`S_{\text{tot}} = \pi L_L`$ is therefore not a drag-free curiosity, it is exact for any constant-$`C_L`$ model with a vertical spin axis. That is what makes the closure problem tractable, because the azimuth condition collapses to a pure path-length condition.
 
-Two further exact consequences explain why the third claim survives even with Magnus active. Magnus with a vertical spin axis has no $`z`$-component, so $`v_z`$ is purely ballistic and the hang time is exactly $`2v_0\sin\theta/g`$, verified to $`10^{-9}\ \mathrm{s}`$. And Magnus does no work while rotating the horizontal velocity without changing its magnitude, so $`\lvert\mathbf{v}_h\rvert = v_0\cos\theta`$ is conserved, verified to $`10^{-9}`$. The speed profile is therefore identical to the drag-free parabola's, which is why the classical arc-length formula
+Two further exact consequences explain why the third result survives even with Magnus active. Magnus with a vertical spin axis has no $`z`$-component, so $`v_z`$ is purely ballistic and the hang time is exactly $`2v_0\sin\theta/g`$, verified to $`10^{-9}\ \mathrm{s}`$. And Magnus does no work while rotating the horizontal velocity without changing its magnitude, so $`\lvert\mathbf{v}_h\rvert = v_0\cos\theta`$ is conserved, verified to $`10^{-9}`$. The speed profile is therefore identical to the drag-free parabola's, which is why the classical arc-length formula
 
 ```math
 S = \frac{v_0^2}{g}\Bigl[\sin\theta + \cos^2\theta\,\ln\bigl(\tan\theta + \sec\theta\bigr)\Bigr]
@@ -102,7 +102,7 @@ The two residuals $`F_1 = z(t^*) - z_{\text{launch}}`$ and $`F_2 = \psi(t^*) - \
 J = \begin{pmatrix} 14.382026 & 290.054597 \\ 0.072313 & 1.458382 \end{pmatrix}, \qquad \sigma = \bigl(2.904\times10^{2},\; 1.172\times10^{-6}\bigr), \qquad \frac{\sigma_{\min}}{\sigma_{\max}} = 4.04\times10^{-9}
 ```
 
-Numerically rank 1. One row is a clean multiple of the other, $`J_{2,:} = J_{1,:}/198.9`$. A 2D Newton solve on this system is solving a singular problem, and the correct formulation is 1D in $`v_0`$ at fixed $`\theta`$. **However**, see the impossibility result below: the physical problem really does become 2D once drag is present, just through a different second equation than the one originally proposed.
+Numerically rank 1. One row is a clean multiple of the other, $`J_{2,:} = J_{1,:}/198.9`$. A 2D Newton solve on this system is solving a singular problem, and the correct formulation is 1D in $`v_0`$ at fixed $`\theta`$. **However**, see the impossibility result below: the physical problem does become genuinely 2D once drag is present, through a second condition that is invisible in the drag-free case because it holds automatically.
 
 ### A baseball cannot do it
 
@@ -254,7 +254,7 @@ Setting $`\Delta\psi = \pi`$ in the master identity gives
 
 for the **horizontal** speed, with gravity fully on, for any launch angle, any ball, any speed. Measured maximum relative error across four balls and three launch angles is below $`10^{-9}`$, which is integrator-limited. More generally $`\lvert w\rvert = \lvert w_0\rvert e^{-(C_D/C_L)\Delta\psi}`$, so the horizontal hodograph is a **logarithmic spiral** whose pitch is set entirely by the lift-to-drag ratio.
 
-I initially scored $`v_f/v_0 = e^{-\pi C_D/C_L}`$ as refuted, off by a factor of 23 near the feasibility boundary. That verdict is correct for the **total** speed, which is what the brief asked about, and the table stands:
+It is worth being explicit about what the law does *not* say. Applied to the **total** speed the same expression is badly wrong, underestimating the residual speed by a factor of 23 near the feasibility boundary:
 
 | $`C_L/C_D`$ | predicted | simulated total | ratio |
 |---|---|---|---|
@@ -273,7 +273,7 @@ A useful corollary, since the relation inverts cleanly:
 \frac{C_D}{C_L} = \frac{\ln\bigl(\lvert w_0\rvert/\lvert w_f\rvert\bigr)}{\Delta\psi}
 ```
 
-You can extract a real ball's lift-to-drag ratio from a single tracked trajectory by comparing how much its horizontal speed decayed against how far its heading swung. No force measurement, no wind tunnel, and gravity drops out of the answer.
+A real ball's lift-to-drag ratio can therefore be extracted from a single tracked trajectory, by comparing how much its horizontal speed decayed against how far its heading swung. No force measurement and no wind tunnel are needed, and gravity drops out of the expression identically.
 
 ### Curvature, and why gravity alone makes the oval
 
@@ -283,7 +283,7 @@ The ground-track radius of curvature is $`R_h = (ds_h/dt)/(d\psi/dt) = \lvert w\
 R_h = L_L\cos\gamma
 ```
 
-verified below $`10^{-12}`$ relative with drag on or off. Two readings follow. The track is tightest where the ball climbs or dives hardest and flattest at the apex, and at the apex $`\gamma = 0`$ so $`R_h = L_L`$ exactly. That makes $`L_L`$ directly measurable: photograph the ground track, measure its radius of curvature at the top of the arc, and you have $`2m/(\rho C_L A)`$ without knowing $`C_L`$, $`m`$ or $`A`$ separately.
+verified below $`10^{-12}`$ relative with drag on or off. Two readings follow. The track is tightest where the ball climbs or dives hardest and flattest at the apex, and at the apex $`\gamma = 0`$ so $`R_h = L_L`$ exactly. That makes $`L_L`$ directly measurable: photographing the ground track and measuring its radius of curvature at the top of the arc yields $`2m/(\rho C_L A)`$ without separate knowledge of $`C_L`$, $`m`$ or $`A`$.
 
 Since drag is antiparallel to $`\mathbf{v}`$ it cannot bend a path, only change the speed along it. With $`g = 0`$ the ground track must therefore be a perfect circle of radius $`L_L`$, drag or no drag:
 
@@ -314,7 +314,7 @@ that is, if and only if the positive weight $`\rho`$ is balanced about $`u = \pi
 
 **Drag-free**, $`\mu = 0`$ so $`\rho = 1/\lvert\mathbf{v}\rvert`$, the apex sits exactly at $`\psi = \pi/2`$, and $`\lvert\mathbf{v}\rvert`$ is symmetric about it. The weight is symmetric, $`\cos u`$ is antisymmetric, and the integral vanishes identically. The chord is exactly perpendicular to the launch direction, measured at $`90.000000^\circ`$ for every launch angle. This is precisely the condition that makes the mirror image of ball A's launch anti-parallel to it, which is why the two balls can be thrown in opposite directions and still meet.
 
-**With drag** the balance breaks, and always in the same direction, though not for the reason an earlier version of this README gave. Folding the integral about $`u=\pi/2`$ turns the sign into a comparison of descent steepness against ascent steepness at matched turn angle, $`\lvert\gamma(\pi-u)\rvert`$ versus $`\lvert\gamma(u)\rvert`$, and it is tempting to claim the descent is always steeper so the bracket is positive pointwise. **That claim is wrong.** Drag makes the ascending arc longer than the descending one, so the apex sits at a turn angle *greater* than $`\pi/2`$ (measured: $`0.543\pi`$, $`0.572\pi`$, $`0.635\pi`$). For $`u`$ slightly below $`\pi/2`$ both $`u`$ and $`\pi-u`$ then lie on the ascent and the ordering reverses, so the folded integrand changes sign exactly once. Positivity of the integral is genuinely an integral statement: a large positive contribution near launch outweighs a smaller negative one near the midpoint. What *is* proved, by perturbation theory in the reduced equation, is the leading behaviour
+**With drag** the balance breaks, and always in the same direction, though not for the most obvious reason. Folding the integral about $`u=\pi/2`$ turns the sign into a comparison of descent steepness against ascent steepness at matched turn angle, $`\lvert\gamma(\pi-u)\rvert`$ versus $`\lvert\gamma(u)\rvert`$, and it is tempting to claim the descent is always steeper so the bracket is positive pointwise. **That claim is wrong.** Drag makes the ascending arc longer than the descending one, so the apex sits at a turn angle *greater* than $`\pi/2`$ (measured: $`0.543\pi`$, $`0.572\pi`$, $`0.635\pi`$). For $`u`$ slightly below $`\pi/2`$ both $`u`$ and $`\pi-u`$ then lie on the ascent and the ordering reverses, so the folded integrand changes sign exactly once. Positivity of the integral is genuinely an integral statement: a large positive contribution near launch outweighs a smaller negative one near the midpoint. What *is* proved, by perturbation theory in the reduced equation, is the leading behaviour
 
 ```math
 90^\circ - \beta \;=\; \Bigl(\tfrac{8}{3}-\tfrac{24}{\pi^2}\Bigr)\,\mu\,\theta^2 \;+\; O(\mu^2,\theta^4)
@@ -344,7 +344,7 @@ The original expectation was that drag collapses the one-parameter family into a
 G_1(v_0, \theta) = \psi(t_{\text{height}}) - \pi = 0, \qquad G_2(v_0, \theta) = \text{bearing} - 90^\circ = 0
 ```
 
-Two independent equations, two unknowns. The instinct that drag makes this genuinely two-dimensional was right; the second equation is just not the one originally written down. And the answer is that $`G_2 < 0`$ everywhere, so the system has no solution except in the degenerate limit $`\theta \to 0`$ with $`v_0 \to \infty`$.
+Two independent equations, two unknowns. Drag therefore does make the problem genuinely two-dimensional, but through the bearing condition rather than through any re-reading of the closure conditions. The answer is that $`G_2 < 0`$ everywhere, so the system has no solution except in the degenerate limit $`\theta \to 0`$ with $`v_0 \to \infty`$.
 
 ### The one thing that did not work out
 
@@ -356,11 +356,11 @@ Drop the requirement that each ball turn exactly $`180^\circ`$ and keep only "th
 
 The **sum** of the turns is fixed at $`360^\circ`$, and the equal split at $`180^\circ`$ each is a drag-free accident. Since $`\Delta\psi = k_L s`$, this says the two path lengths must sum to $`2\pi L_L`$. Counting gives four unknowns $`(v_{0A}, \theta_A, v_{0B}, \theta_B)`$ against four conditions (same time, same $`x`$, same $`y`$, head-on), so isolated solutions should exist generically, with one ball turning past $`180^\circ`$ so that its chord bearing exceeds $`90^\circ`$.
 
-**This did not pan out numerically and is not being claimed.** A 70 by 70 grid search over ball A, with pairing restricted to $`\Delta\psi_A < 180^\circ < \Delta\psi_B`$, found candidates with genuinely unequal turns, for example $`145^\circ`$ and $`215^\circ`$ at launch angles of $`6.3^\circ`$ and $`3.8^\circ`$ with a scaled residual of $`9.9\times10^{-3}`$. But every one of four independent seeds, refined by bounded least-squares, drained back to the near-symmetric degenerate corner at $`\theta \approx 1.1^\circ`$ and $`v_0 \approx 120\ \mathrm{m/s}`$ with turns of $`179^\circ`$ and $`181^\circ`$, stalling at a 1.5 to 2.0 mm miss. That residual floor is consistent with the $`\theta^2`$ law, meaning it is the same obstruction rather than a converged root. So no isolated finite-angle asymmetric solution was found, and the numerical evidence points against one existing in the region searched, but non-existence has not been proved. This is the one genuinely open question here.
+**This branch did not pan out numerically, and no such solution is claimed here.** A 70 by 70 grid search over ball A, with pairing restricted to $`\Delta\psi_A < 180^\circ < \Delta\psi_B`$, found candidates with genuinely unequal turns, for example $`145^\circ`$ and $`215^\circ`$ at launch angles of $`6.3^\circ`$ and $`3.8^\circ`$ with a scaled residual of $`9.9\times10^{-3}`$. But every one of four independent seeds, refined by bounded least-squares, drained back to the near-symmetric degenerate corner at $`\theta \approx 1.1^\circ`$ and $`v_0 \approx 120\ \mathrm{m/s}`$ with turns of $`179^\circ`$ and $`181^\circ`$, stalling at a 1.5 to 2.0 mm miss. That residual floor is consistent with the $`\theta^2`$ law, meaning it is the same obstruction rather than a converged root. So no isolated finite-angle asymmetric solution was found, and the numerical evidence points against one existing in the region searched, but non-existence has not been proved. This is the one genuinely open question in the study.
 
 ## Novelty check
 
-I went through the sports-aerodynamics, exterior-ballistics and projectile-motion literature specifically to find out what here is actually new. The result is cleaner than expected, because the two canonical references for this exact configuration both state in print that no closed form exists.
+The sports-aerodynamics, exterior-ballistics and projectile-motion literature was surveyed to establish what here is actually new. The picture is unusually clear, because the two canonical references for this exact configuration both state in print that no closed form exists.
 
 ### What is definitely old
 
@@ -378,7 +378,7 @@ Magnus with a vertical spin axis has the same $`\hat{\mathbf{z}}\times\mathbf{v}
 
 Two references are decisive because they treat precisely this configuration.
 
-**Bray and Kerwin (2003), "Modelling the flight of a soccer ball in a direct free kick",** is the canonical treatment of a ball spinning about a tilted axis with pure sidespin as a limiting case, which is exactly our vertical-axis problem. They write down the same equations of motion and state plainly: *"These equations have no closed form solutions but can be solved numerically using a Runge-Kutta routine."* A full-text search of the paper returns zero occurrences of "arc length", "curvature", "radius" or "analytic".
+**Bray and Kerwin (2003), "Modelling the flight of a soccer ball in a direct free kick",** is the canonical treatment of a ball spinning about a tilted axis with pure sidespin as a limiting case, which is exactly the vertical-axis problem treated here. They write down the same equations of motion and state plainly: *"These equations have no closed form solutions but can be solved numerically using a Runge-Kutta routine."* A full-text search of the paper returns zero occurrences of "arc length", "curvature", "radius" or "analytic".
 
 **Nathan (2008), "The effect of spin on the flight of a baseball" (Am. J. Phys.),** is the standard reference for spinning-ball flight. It integrates the equations with fourth-order Runge-Kutta. Full-text search returns zero occurrences of "arc length", "curvature", "closed form", "analytic" or "exact".
 
@@ -395,29 +395,29 @@ Against that background, these look genuinely new:
 5. The chord-perpendicularity criterion $`\int_0^\pi \rho(u)\cos u\,du = 0`$, and the impossibility theorem that follows from it.
 6. The observation that the bearing deficit depends only on $`(C_D/C_L, \theta)`$ and vanishes as $`\theta^2`$.
 
-The honest caveat that remains: I could not obtain the full text of McCoy's monograph or of paywalled ballistics journals, so I cannot rule out that some form of the arc-length turning law is recorded in ballistics notation somewhere. But the two most authoritative open references for spinning sports balls both assert numerically that no closed form is available, which is a strong signal that this particular reduction is not in circulation.
+One caveat remains. The full text of McCoy's monograph and of several paywalled ballistics journals was not available for this survey, so it cannot be ruled out that some form of the arc-length turning law is recorded in ballistics notation somewhere. But the two most authoritative open references for spinning sports balls both proceed numerically and state that no closed form is available, which is a strong signal that this reduction is not in circulation.
 
 ### Sources
 
 [Bray and Kerwin, Modelling the flight of a soccer ball in a direct free kick](https://people.stfx.ca/smackenz/courses/hk474/labs/jump%20float%20lab/bray%202002%20modelling%20the%20flight%20of%20a%20soccer%20ball%20in%20a%20direct%20free%20kick.pdf) · [Nathan, The effect of spin on the flight of a baseball, Am. J. Phys. 76, 119 (2008)](https://baseball.physics.illinois.edu/ajpfeb08.pdf) · [Exact and approximate solutions to projectile motion in air incorporating Magnus effect, EPJ Plus (2020)](https://link.springer.com/article/10.1140/epjp/s13360-020-00593-4) · [Study of the asymptotic motion of a sporting projectile taking into account the Magnus force, arXiv:2409.15110](https://arxiv.org/abs/2409.15110) · [An analytic solution to the equations governing the motion of a point mass with quadratic resistance, arXiv:1305.1283](https://arxiv.org/pdf/1305.1283) · [McCoy, Modern Exterior Ballistics, full text](https://archive.org/stream/ModernExteriorBallisticsTheLaunchAndFlightDynamicsOfSymmetricProjectiles2ndEd.R.McCoy/Modern+Exterior+Ballistics+-+The+Launch+and+Flight+Dynamics+of+Symmetric+Projectiles+2nd+ed.+-+R.+McCoy_djvu.txt) · [Magnus force in superfluids and superconductors, Phys. Rev. B 55, 485 (1997)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.55.485) · [Price, A Coriolis tutorial (WHOI)](https://www2.whoi.edu/staff/jprice/wp-content/uploads/sites/199/2019/01/aCt_2003.pdf) · [Turning flight performance notes, Virginia Tech](https://archive.aoe.vt.edu/lutze/AOE3104/turningflight.pdf) · [Accelerated performance and turns, Engineering LibreTexts](https://eng.libretexts.org/Bookshelves/Aerospace_Engineering/Aerodynamics_and_Aircraft_Performance_3e_(Marchman)/08:_Accelerated_Performance-_Turns) · [A review of the analysis of wind-influenced projectile motion, Lubarda (UCSD)](http://maeresearch.ucsd.edu/~vlubarda/research/pdfpapers/AAM22.pdf)
 
-## Scorecard
+## Summary of results
 
-| claim | verdict |
+| statement | status |
 |---|---|
 | $`d\psi/ds = k_L`$ constant | holds to $`4.4\times10^{-16}`$, and also holds with drag on |
 | $`S_{\text{tot}} = \pi L_L`$, independent of $`v_0`$ and $`\theta`$ | holds to $`1.1\times10^{-15}`$, and also holds with drag on |
 | ballistic arc-length closed form | holds to $`3.4\times10^{-10}`$ |
 | $`v_0 = \sqrt{\pi g L_L/f(\theta)}`$ drag-free | holds to $`2\times10^{-14}`$ |
-| drag collapses the family to a 2D root-find | partly vindicated: $`(F_1,F_2)`$ is rank 1, but the physical problem is genuinely 2D via the bearing condition |
-| baseball closes with drag | no, short by $`0.496\pi`$; root exists only at Mach 1.8 |
+| drag makes the closure problem two-dimensional | yes, but via the bearing condition; the $`(F_1,F_2)`$ pair is rank 1 |
+| a baseball can close a $`180^\circ`$ turn with drag | no, short by $`0.496\pi`$; a root exists only at Mach 1.8 |
 | balls meet at same point, same time, antipodally | yes, drag-free: $`3.6\times10^{-15}`$ s, $`5.2\times10^{-9}`$ m relative to path, bearing $`90.000000^\circ`$ |
-| closing speed $`= 2\lvert v_f\rvert`$ | no, it is $`2\cos\theta\,\lvert v_f\rvert`$, true only as $`\theta\to0`$ |
-| feasibility boundary at $`C_L/C_D = \pi`$ | no, boundary is $`\pi/G`$; $`\pi`$ is the special case $`G = 1`$, meaning $`v_0 = 1.25 v_t`$ |
-| $`v_f/v_0 = e^{-\pi C_D/C_L}`$ for total speed | no, lower bound only, off by $`23\times`$ at $`C_L/C_D = 0.5`$ |
-| the same formula for horizontal speed | exact, below $`10^{-9}`$ |
-| track is an oval, tightest at launch and landing | yes, and exactly $`R_{\max}/R_{\min} = \sec\theta`$ |
-| oppositely-thrown mirror pair collides with drag | never, for any ball at any speed or angle |
+| closing speed | $`2\cos\theta\,\lvert v_f\rvert`$, not $`2\lvert v_f\rvert`$; the two agree only as $`\theta\to0`$ |
+| feasibility boundary | at $`C_L/C_D = \pi/G`$; the value $`\pi`$ is the special case $`G = 1`$, meaning $`v_0 = 1.25 v_t`$ |
+| $`e^{-\pi C_D/C_L}`$ applied to **total** speed | a lower bound only, off by $`23\times`$ at $`C_L/C_D = 0.5`$ |
+| $`e^{-\pi C_D/C_L}`$ applied to **horizontal** speed | exact, below $`10^{-9}`$ |
+| ground track is an oval, tightest at launch and landing | yes, with exactly $`R_{\max}/R_{\min} = \sec\theta`$ |
+| an oppositely-thrown mirror pair collides, with drag | never, for any ball at any speed or launch angle |
 
 Nothing was tuned, clamped or regularised to make any of these agree. Every solver raises `DivergedError` rather than returning an approximate result.
 

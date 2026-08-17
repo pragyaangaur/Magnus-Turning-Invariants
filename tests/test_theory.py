@@ -17,8 +17,8 @@ BALLS = ["baseball", "frisbee", "soccer", "pingpong"]
 def test_horizontal_speed_is_exact_log_spiral(nm, td):
     """|w(s)| = |w_0| exp(-(C_D/C_L) * dpsi), EXACTLY, with gravity and drag both on.
 
-    This is the user's exp(-pi C_D/C_L) formula, correctly attached to the HORIZONTAL
-    speed rather than the total speed.
+    At dpsi = pi this is exp(-pi C_D/C_L).  The law governs the HORIZONTAL speed;
+    applied to the total speed the same expression is only a lower bound.
     """
     p = make_ball(nm)
     r = fly(initial_state(60.0, np.radians(td), SPIN), p, t_max_s=400.0, stop_on="height")
@@ -66,9 +66,12 @@ def test_chord_is_perpendicular_without_drag(td):
 @pytest.mark.parametrize("nm", ["frisbee", "soccer", "pingpong"])
 @pytest.mark.parametrize("td", [10.0, 30.0, 60.0])
 def test_drag_always_tips_the_chord_below_perpendicular(nm, td):
-    """With drag the descent is steeper than the ascent at matched turn angle, so the
-    chord bearing is strictly < 90 deg.  Hence a mirror pair thrown in exactly opposite
-    directions can never meet -- the symmetric problem is unsolvable with any drag."""
+    """With drag the chord bearing is strictly < 90 deg, so a mirror pair thrown in
+    exactly opposite directions can never meet.
+
+    Note this is an INTEGRAL statement, not a pointwise one: see
+    test_reduced.test_pointwise_inequality_actually_fails.
+    """
     p = make_ball(nm)
     th = np.radians(td)
     v0 = solve_v0(th, p, v0_cap_m_per_s=3000.0)

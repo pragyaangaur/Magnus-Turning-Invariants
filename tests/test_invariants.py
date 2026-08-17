@@ -1,4 +1,4 @@
-"""Task 1 regression tests: the drag-free analytic claims, at tight tolerances."""
+"""Regression tests for the drag-free turning invariants, at tight tolerances."""
 import numpy as np
 import pytest
 
