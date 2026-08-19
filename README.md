@@ -374,7 +374,7 @@ Magnus with a vertical spin axis has the same $`\hat{\mathbf{z}}\times\mathbf{v}
 
 Two references are decisive because they treat precisely this configuration.
 
-**Bray and Kerwin (2003), "Modelling the flight of a soccer ball in a direct free kick",** is the canonical treatment of a ball spinning about a tilted axis with pure sidespin as a limiting case, which is exactly the vertical-axis problem treated here. They write down the same equations of motion and state plainly: *"These equations have no closed form solutions but can be solved numerically using a Runge-Kutta routine."* A full-text search of the paper returns zero occurrences of "arc length", "curvature", "radius" or "analytic".
+**Bray and Kerwin (2003), "Modelling the flight of a soccer ball in a direct free kick",** is the canonical treatment of a ball spinning about a tilted axis with pure sidespin as a limiting case, which is exactly the vertical-axis problem treated here. They write down the same equations of motion and state plainly: *"These equations have no closed form solutions but can be solved numerically using a Runge-Kutta routine."* A full-text search of the  returns zero occurrences of "arc length", "curvature", "radius" or "analytic".
 
 **Nathan (2008), "The effect of spin on the flight of a baseball" (Am. J. Phys.),** is the standard reference for spinning-ball flight. It integrates the equations with fourth-order Runge-Kutta. Full-text search returns zero occurrences of "arc length", "curvature", "closed form", "analytic" or "exact".
 
@@ -405,7 +405,7 @@ One caveat remains. The full text of McCoy's monograph and of several paywalled 
 - [Price, *A Coriolis tutorial* (WHOI)](https://www2.whoi.edu/staff/jprice/wp-content/uploads/sites/199/2019/01/aCt_2003.pdf)
 - [*Turning flight performance notes*, Virginia Tech](https://archive.aoe.vt.edu/lutze/AOE3104/turningflight.pdf)
 - [*Accelerated performance and turns*, Engineering LibreTexts](https://eng.libretexts.org/Bookshelves/Aerospace_Engineering/Aerodynamics_and_Aircraft_Performance_3e_(Marchman)/08:_Accelerated_Performance-_Turns)
-- [Lubarda, *A review of the analysis of wind-influenced projectile motion* (UCSD)](http://maeresearch.ucsd.edu/~vlubarda/research/pdfpapers/AAM22.pdf)
+- [Lubarda, *A review of the analysis of wind-influenced projectile motion* (UCSD)](http://maeresearch.ucsd.edu/~vlubarda/research/pdfs/AAM22.pdf)
 
 ## Summary of results
 
@@ -440,8 +440,6 @@ python -m pytest -q      # 139 regression tests
 ## Repository layout
 
 ```
-paper/paper.tex    manuscript (REVTeX 4.2), compiles with latexmk -pdf
-paper/refs.bib     bibliography, every entry checked against the publisher record
 src/model.py       Params dataclass, coefficient models, batched right-hand side
 src/integrate.py   RK45 with event detection, batched fixed-step RK4, crossing refinement
 src/solve.py       closure root-finding, rank-deficiency diagnostic, feasibility scans
