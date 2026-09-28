@@ -1,4 +1,6 @@
 """Sweeps, symmetry checks, feasibility map, shape analysis, and all figures."""
+import os
+
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
@@ -9,6 +11,51 @@ from .integrate import fly, rk4, batched_crossing, DivergedError
 from .solve import SPIN_RAD_PER_S
 
 FIG = "figures"
+
+# Figure geometry, in inches.  These are the sizes used for the repository
+# figures; override FIG and FIGSIZE before calling the fig_* helpers to retarget
+# a different layout, for example to draw each figure at its final printed width
+# so that the smallest label stays at or above an 8 pt floor.
+FIGSIZE = {
+    "invariants": (10, 4),
+    "feasibility": (12, 4.6),
+    "residual_speed": (6, 4.2),
+    "ground_track": (11, 4.6),
+    "trajectory_pair": (6.5, 5),
+    "deficit": (13.5, 4.0),
+}
+
+
+def use_ajp_style():
+    """Journal-figure defaults: Times-like serif, 8 pt floor, framed axes.
+
+    AJP asks for a Times face for consistency with the running text, a smallest
+    label of 8 pt at the printed width, and axes drawn as a closed frame with
+    tick marks on all four sides.
+    """
+    plt.rcParams.update({
+        "font.family": "serif",
+        "font.serif": ["Times New Roman", "Nimbus Roman", "STIXGeneral", "DejaVu Serif"],
+        "mathtext.fontset": "stix",
+        "font.size": 9,
+        "axes.labelsize": 9,
+        "axes.titlesize": 9,
+        "xtick.labelsize": 8,
+        "ytick.labelsize": 8,
+        "legend.fontsize": 8,
+        "figure.labelsize": 9,
+        "axes.linewidth": 0.8,
+        "lines.linewidth": 1.2,
+        "xtick.direction": "in",
+        "ytick.direction": "in",
+        "xtick.top": True,
+        "ytick.right": True,
+        "xtick.minor.visible": True,
+        "ytick.minor.visible": True,
+        "legend.frameon": False,
+        "savefig.bbox": "tight",
+        "savefig.pad_inches": 0.02,
+    })
 
 
 # ---------------------------------------------------------------- mirror symmetry
@@ -162,6 +209,7 @@ def ground_track_curvature(sol, t_end, p, n=2000):
 
 # ---------------------------------------------------------------- figures
 def _save(fig, name):
+    os.makedirs(FIG, exist_ok=True)
     fig.tight_layout()
     fig.savefig(f"{FIG}/{name}.pdf")
     plt.close(fig)
@@ -169,31 +217,37 @@ def _save(fig, name):
 
 def fig_invariants(p_ideal):
     kL, LL = p_ideal.k_lift_per_m, p_ideal.lift_length_m
-    fig, ax = plt.subplots(1, 2, figsize=(10, 4))
-    for v0, td in [(30, 25), (60, 45), (100, 70)]:
+    fig, ax = plt.subplots(1, 2, figsize=FIGSIZE["invariants"])
+    for (v0, td), ls in zip([(30, 25), (60, 45), (100, 70)], ["-", "--", ":"]):
         r = fly(initial_state(v0, np.radians(td), SPIN_RAD_PER_S), p_ideal,
                 t_max_s=4000.0, stop_on="psi")
         Y = r["sol"].sol(np.linspace(0, r["t_psi_s"], 2000))
         d = rhs(0.0, Y, p_ideal)
-        ax[0].plot(Y[10], d[9] / d[10] / kL - 1.0, label=f"$v_0$={v0}, $\\theta$={td}$^\\circ$")
+        ax[0].plot(Y[10], d[9] / d[10] / kL - 1.0, ls=ls,
+                   label=f"$v_0$={v0}, $\\theta$={td}$^\\circ$")
     ax[0].set(xlabel="path length $s$ [m]", ylabel=r"$(\mathrm{d}\psi/\mathrm{d}s)/k_L - 1$",
-              title="(a) turning rate is constant")
+              title="(a) turning rate")
 
     v0s = np.linspace(10, 120, 8)
-    for td in [10, 30, 50, 70, 85]:
+    for td, mk in zip([10, 30, 50, 70, 85], ["o", "s", "^", "v", "d"]):
         S = [fly(initial_state(v, np.radians(td), SPIN_RAD_PER_S), p_ideal,
                  t_max_s=8000.0, stop_on="psi")["y_psi"][10] for v in v0s]
-        ax[1].plot(v0s, np.array(S) / (np.pi * LL) - 1.0, "o-", ms=3,
+        ax[1].plot(v0s, np.array(S) / (np.pi * LL) - 1.0, marker=mk, ls="-", ms=3,
                    label=f"$\\theta$={td}$^\\circ$")
-    ax[1].set(xlabel="$v_0$ [m/s]", ylabel=r"$S_{tot}/(\pi L_L) - 1$",
-              title=r"(b) $S_{tot}=\pi L_L$, independent of $v_0,\theta$")
+    ax[1].set(xlabel="$v_0$ [m/s]", ylabel=r"$S_{\rm tot}/(\pi L_L) - 1$",
+              title=r"(b) path length of a $180^\circ$ turn")
+    # Both panels are noise floors that fill their boxes, so open headroom above
+    # the data rather than letting the key sit on top of it.
     for a in ax:
-        a.legend(fontsize=8)
+        lo, hi = a.get_ylim()
+        a.set_ylim(lo, lo + 2.0 * (hi - lo))
+        a.legend(loc="upper right", ncol=1, handlelength=1.8, borderpad=0.2,
+                 labelspacing=0.25)
     _save(fig, "invariants")
 
 
 def fig_feasibility(psi_max, vf_close, cl_cd, loading, pts):
-    fig, ax = plt.subplots(1, 2, figsize=(12, 4.6))
+    fig, ax = plt.subplots(1, 2, figsize=FIGSIZE["feasibility"])
     XL = r"ballistic loading $m/(C_L A)$ [kg/m$^2$]"
     # pcolormesh, not imshow: both axes are logarithmic, so the cells must carry their
     # true (log-spaced) coordinates rather than be stretched linearly across the box.
@@ -220,7 +274,7 @@ def fig_vf_law(vhat, G_of_vhat, VF_of_vhat):
     R = np.linspace(0.3, 20.0, 400)                      # C_L/C_D
     vhat_close = np.interp(np.pi / R, G_of_vhat, vhat, left=np.nan, right=np.nan)
     vf_sim = np.interp(vhat_close, vhat, VF_of_vhat, left=np.nan, right=np.nan)
-    fig, ax = plt.subplots(figsize=(6, 4.2))
+    fig, ax = plt.subplots(figsize=FIGSIZE["residual_speed"])
     ax.plot(R, np.exp(-np.pi / R), "r--", label=r"prediction $e^{-\pi C_D/C_L}$")
     ax.plot(R, vf_sim, "k-", label="simulated, at closure")
     ax.set_xlabel(r"$C_L/C_D$"); ax.set_ylabel(r"$v_f/v_0$")
@@ -236,33 +290,50 @@ def fig_shape_and_3d(v0, theta, p):
     ts, Y, Rh = ground_track_curvature(r["sol"], r["t_height_s"], p)
     xc, yc, Rfit, rms = fit_circle(Y[0], Y[1])
 
-    fig, ax = plt.subplots(1, 2, figsize=(11, 4.6))
+    fig, ax = plt.subplots(1, 2, figsize=FIGSIZE["ground_track"])
     tt = np.linspace(0, 2 * np.pi, 400)
-    ax[0].plot(Y[0], Y[1], "k-", lw=1.6, label="ground track")
-    ax[0].plot(xc + Rfit * np.cos(tt), yc + Rfit * np.sin(tt), "r--", lw=1,
-               label=f"circle fit (RMS {rms:.2f} m)")
-    ax[0].plot([0, Y[0, -1]], [0, Y[1, -1]], "b.", ms=10)
-    ax[0].set(xlabel="x [m]", ylabel="y [m]", title="(5) ground track vs circle", aspect="equal")
-    ax[0].legend(fontsize=8)
+    ax[0].plot(Y[0], Y[1], "k-", lw=1.4, label="ground track")
+    ax[0].plot(xc + Rfit * np.cos(tt), yc + Rfit * np.sin(tt), "r--", lw=1.0,
+               label=f"circle fit, RMS {rms:.2f} m")
+    ax[0].plot([0, Y[0, -1]], [0, Y[1, -1]], "ko", ms=4, mfc="w")
+    ax[0].set(xlabel="$x$ [m]", ylabel="$y$ [m]", title="(a) ground track and circle fit",
+              aspect="equal")
+    ax[0].legend(loc="upper left", handlelength=1.8, borderpad=0.2, labelspacing=0.25)
     ax[1].plot(Y[10], Rh, "k-")
-    ax[1].set(xlabel="path length $s$ [m]", ylabel="ground-track radius of curvature [m]",
-              title=f"$R_{{max}}/R_{{min}}$={Rh.max()/Rh.min():.4f} "
-                    f"($\\sec\\theta$={1/np.cos(theta):.4f})")
+    ax[1].set(xlabel="path length $s$ [m]", ylabel=r"$R_h$ [m]",
+              title=r"(b) $R_h=L_L\cos\gamma$")
     _save(fig, "ground_track")
 
     pair = mirror_pair(v0, theta, p)
-    fig = plt.figure(figsize=(6.5, 5))
+    fig = plt.figure(figsize=FIGSIZE["trajectory_pair"])
     ax3 = fig.add_subplot(111, projection="3d")
-    for res, c in ((pair["rA"], "C0"), (pair["rB"], "C1")):
+    for res, c, ls, lab in ((pair["rA"], "k", "-", "ball $A$ (spin $+\\hat{z}$)"),
+                            (pair["rB"], "C3", "--", "ball $B$ (spin $-\\hat{z}$)")):
         tsx = np.linspace(0, res["t_height_s"], 800)
         W = res["sol"].sol(tsx)
-        ax3.plot(W[0], W[1], W[2], color=c, lw=1.4)
+        ax3.plot(W[0], W[1], W[2], color=c, ls=ls, lw=1.2, label=lab)
     P = pair["yA"]
-    ax3.scatter([0], [0], [0], color="k", s=30)
-    ax3.scatter([P[0]], [P[1]], [P[2]], color="r", s=40)
-    ax3.set(xlabel="x [m]", ylabel="y [m]", zlabel="z [m]",
-            title="trajectory pair and collision point")
-    _save(fig, "trajectory_pair")
+    ax3.scatter([0], [0], [0], color="k", s=18, label="release")
+    ax3.scatter([P[0]], [P[1]], [P[2]], color="C3", s=26, marker="*", label="meeting point")
+    # 3-D panes carry three sets of ticks into a small box, so thin them out and
+    # push the labels clear of the tick text.
+    ax3.set(xlabel="$x$ [m]", ylabel="$y$ [m]", zlabel="$z$ [m]")
+    for axis in (ax3.xaxis, ax3.yaxis, ax3.zaxis):
+        axis.set_major_locator(plt.MaxNLocator(4))
+        axis.set_minor_locator(plt.NullLocator())
+    ax3.tick_params(labelsize=7, pad=-1.5)
+    ax3.xaxis.labelpad = -3
+    ax3.yaxis.labelpad = -3
+    ax3.zaxis.labelpad = 2
+    ax3.view_init(elev=22, azim=-58)
+    ax3.legend(loc="upper left", bbox_to_anchor=(-0.06, 1.02), handlelength=1.6,
+               borderpad=0.2, labelspacing=0.25)
+    # tight_layout mismeasures a 3-D axes and pushes the z label off the canvas,
+    # so reserve the margins by hand for this one figure.
+    os.makedirs(FIG, exist_ok=True)
+    fig.subplots_adjust(left=0.0, right=0.83, bottom=0.02, top=0.99)
+    fig.savefig(f"{FIG}/trajectory_pair.pdf", bbox_inches=None)
+    plt.close(fig)
     return dict(rms_circle_m=rms, R_fit_m=Rfit, R_ratio=float(Rh.max() / Rh.min()),
                 sec_theta=float(1 / np.cos(theta)), y_end=Y[:, -1], pair=pair,
                 t_s=r["t_height_s"])
@@ -277,28 +348,30 @@ def fig_deficit(mu_grid=None, theta_deg_grid=None):
     theta_deg_grid = np.linspace(2.0, 88.0, 60) if theta_deg_grid is None else theta_deg_grid
     D, _ = deficit_grid_deg(np.radians(theta_deg_grid), mu_grid, n_bisect=70)
 
-    fig, ax = plt.subplots(1, 3, figsize=(13.5, 4.0))
+    fig, ax = plt.subplots(1, 3, figsize=FIGSIZE["deficit"])
 
     im = ax[0].pcolormesh(theta_deg_grid, mu_grid, D, cmap="magma", shading="nearest",
                           norm=matplotlib.colors.LogNorm(vmin=max(D.min(), 1e-4), vmax=D.max()))
     fig.colorbar(im, ax=ax[0], label=r"$90^\circ-\beta$  [deg]")
     for nm, p in ((n, make_ball(n)) for n in BALLS):
         ax[0].plot(45.0, p.cd_const / p.cl_const, "w+", ms=7, mew=1.4)
-    ax[0].set(yscale="log", xlabel=r"launch angle $\theta$ [deg]", ylabel=r"$\mu=C_D/C_L$",
-              title="chord-bearing deficit (always $>0$)")
+    ax[0].set(yscale="log", xlabel=r"$\theta$ [deg]", ylabel=r"$\mu=C_D/C_L$",
+              title=r"(a) deficit $90^\circ-\beta>0$")
 
     # panel 2: the folded integrand, showing the pointwise inequality fails
-    for mu, td, c in ((1.0, 45.0, "C0"), (0.5, 45.0, "C1"), (1.5, 30.0, "C2")):
+    for mu, td, c, ls in ((1.0, 45.0, "k", "-"), (0.5, 45.0, "C0", "--"),
+                          (1.5, 30.0, "C3", ":")):
         th = np.radians(td)
         u, _, gam = solve_Q(th, solve_lambda(th, mu), mu, n=4001)
         cg = np.cos(gam)
         half = (len(u) - 1) // 2 + 1
         d = cg[:half] - cg[::-1][:half]
-        ax[1].plot(u[:half], d, color=c, label=rf"$\mu$={mu}, $\theta$={td:.0f}$^\circ$")
+        ax[1].plot(u[:half], d, color=c, ls=ls,
+                   label=rf"$\mu$={mu}, $\theta$={td:.0f}$^\circ$")
     ax[1].axhline(0.0, color="k", lw=0.8)
     ax[1].set(xlabel=r"$u$ [rad]", ylabel=r"$\cos\gamma(u)-\cos\gamma(\pi-u)$",
-              title="folded integrand changes sign once")
-    ax[1].legend(fontsize=8)
+              title="(b) folded integrand")
+    ax[1].legend(handlelength=1.8, borderpad=0.2, labelspacing=0.25)
 
     # panel 3: asymptotic law
     C = 8.0 / 3.0 - 24.0 / np.pi ** 2
@@ -307,8 +380,8 @@ def fig_deficit(mu_grid=None, theta_deg_grid=None):
     num = [np.radians(deficit_deg(th, m)) / (m * th ** 2) for m in mus]
     ax[2].semilogx(mus, num, "ko-", ms=3, label="reduced ODE")
     ax[2].axhline(C, color="r", ls="--", label=r"$8/3-24/\pi^2$")
-    ax[2].set(xlabel=r"$\mu=C_D/C_L$", ylabel=r"$(90^\circ-\beta)/(\mu\theta^2)$  [rad]",
-              title=r"asymptotics as $\mu\to0$")
-    ax[2].legend(fontsize=8)
+    ax[2].set(xlabel=r"$\mu=C_D/C_L$", ylabel=r"$(90^\circ-\beta)/(\mu\theta^2)$ [rad]",
+              title=r"(c) limit $\mu\to0$")
+    ax[2].legend(handlelength=1.8, borderpad=0.2, labelspacing=0.25)
     _save(fig, "deficit")
     return D
