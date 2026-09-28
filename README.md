@@ -2,6 +2,10 @@
 
 **Full title: Exact Arc-Length Reduction for Projectile Motion under Quadratic Drag and a Vertical-Axis Magnus Force, with a Non-Existence Result for the Symmetric Two-Ball Rendezvous**
 
+[![arXiv](https://img.shields.io/badge/arXiv-2609.30305-b31b1b.svg)](https://arxiv.org/abs/2609.30305) [![Paper DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22852340.svg)](https://doi.org/10.5281/zenodo.22852340) [![Code DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21979028.svg)](https://doi.org/10.5281/zenodo.21979028) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+The paper is available as a preprint at [arXiv:2609.30305](https://arxiv.org/abs/2609.30305) and is also archived at [doi:10.5281/zenodo.22852340](https://doi.org/10.5281/zenodo.22852340). The code and data are archived at [doi:10.5281/zenodo.21979028](https://doi.org/10.5281/zenodo.21979028), which always resolves to the newest version.
+
 A thrower at the origin releases two balls simultaneously in opposite horizontal directions, each spinning about a vertical axis, one about $`+\hat{z}`$ and one about $`-\hat{z}`$. Under gravity, quadratic drag and the Magnus force, can the two balls curve around and collide head-on at the height they were released, each having turned exactly $`180^\circ`$ in azimuth?
 
 The drag-free version has an exact and rather elegant solution. The version with air resistance is impossible, and the reason is more interesting than "the ball runs out of speed". Getting there turned up an exactly integrable structure hiding inside a system that the sports-ballistics literature uniformly describes as having no closed-form solution.
@@ -374,7 +378,7 @@ Magnus with a vertical spin axis has the same $`\hat{\mathbf{z}}\times\mathbf{v}
 
 Two references are decisive because they treat precisely this configuration.
 
-**Bray and Kerwin (2003), "Modelling the flight of a soccer ball in a direct free kick",** is the canonical treatment of a ball spinning about a tilted axis with pure sidespin as a limiting case, which is exactly the vertical-axis problem treated here. They write down the same equations of motion and state plainly: *"These equations have no closed form solutions but can be solved numerically using a Runge-Kutta routine."* A full-text search of the  returns zero occurrences of "arc length", "curvature", "radius" or "analytic".
+**Bray and Kerwin (2003), "Modelling the flight of a soccer ball in a direct free kick",** is the canonical treatment of a ball spinning about a tilted axis with pure sidespin as a limiting case, which is exactly the vertical-axis problem treated here. They write down the same equations of motion and state plainly: *"These equations have no closed form solutions but can be solved numerically using a Runge-Kutta routine."* A full-text search of the paper returns zero occurrences of "arc length", "curvature", "radius" or "analytic".
 
 **Nathan (2008), "The effect of spin on the flight of a baseball" (Am. J. Phys.),** is the standard reference for spinning-ball flight. It integrates the equations with fourth-order Runge-Kutta. Full-text search returns zero occurrences of "arc length", "curvature", "closed form", "analytic" or "exact".
 
@@ -405,7 +409,7 @@ One caveat remains. The full text of McCoy's monograph and of several paywalled 
 - [Price, *A Coriolis tutorial* (WHOI)](https://www2.whoi.edu/staff/jprice/wp-content/uploads/sites/199/2019/01/aCt_2003.pdf)
 - [*Turning flight performance notes*, Virginia Tech](https://archive.aoe.vt.edu/lutze/AOE3104/turningflight.pdf)
 - [*Accelerated performance and turns*, Engineering LibreTexts](https://eng.libretexts.org/Bookshelves/Aerospace_Engineering/Aerodynamics_and_Aircraft_Performance_3e_(Marchman)/08:_Accelerated_Performance-_Turns)
-- [Lubarda, *A review of the analysis of wind-influenced projectile motion* (UCSD)](http://maeresearch.ucsd.edu/~vlubarda/research/pdfs/AAM22.pdf)
+- [Lubarda, *A review of the analysis of wind-influenced projectile motion* (UCSD)](http://maeresearch.ucsd.edu/~vlubarda/research/pdfpapers/AAM22.pdf)
 
 ## Summary of results
 

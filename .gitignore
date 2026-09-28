@@ -21,3 +21,14 @@ paper/paperNotes.bib
 
 # Local editor and tooling config
 .claude/
+
+# Kept locally and out of the public repository: the manuscript source, the
+# archive and preprint builds, the anonymous journal copy, and contact notes
+paper/
+zenodo/
+arxiv/
+submission/
+outreach/
+AGENTS.md
+magnus_turning_invariants*.pdf
+magnus_turning_invariants_code.zip

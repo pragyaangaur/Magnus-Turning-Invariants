@@ -1,0 +1,38 @@
+cff-version: 1.2.0
+title: "Magnus Turning Invariants: exact turning invariants for projectile motion under quadratic drag and a vertical-axis Magnus force"
+message: "If you use this software or the results in it, please cite both the software archive and the paper."
+type: software
+authors:
+  - family-names: Gaur
+    given-names: Pragyaan
+    email: pragyaangaur12@gmail.com
+repository-code: "https://github.com/pragyaangaur/Magnus-Turning-Invariants"
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.21979028
+    description: "Concept DOI for the software archive. It always resolves to the newest version."
+license: MIT
+keywords:
+  - projectile motion
+  - Magnus force
+  - quadratic drag
+  - exact solution
+  - sports-ball aerodynamics
+  - classical mechanics
+preferred-citation:
+  type: article
+  title: "Exact turning invariants for projectile motion under quadratic drag and a vertical-axis Magnus force"
+  authors:
+    - family-names: Gaur
+      given-names: Pragyaan
+      email: pragyaangaur12@gmail.com
+  year: 2026
+  identifiers:
+    - type: other
+      value: "arXiv:2609.30305"
+      description: "arXiv preprint"
+    - type: doi
+      value: 10.5281/zenodo.22852340
+      description: "Zenodo archive of the preprint"
+  url: "https://arxiv.org/abs/2609.30305"
+  notes: "Preprint, arXiv:2609.30305 [physics.class-ph]."
