@@ -2,7 +2,7 @@
 
 **Full title: Exact Arc-Length Reduction for Projectile Motion under Quadratic Drag and a Vertical-Axis Magnus Force, with a Non-Existence Result for the Symmetric Two-Ball Rendezvous**
 
-[![arXiv](https://img.shields.io/badge/arXiv-2609.30305-b31b1b.svg)](https://arxiv.org/abs/2609.30305) [![Paper DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22852340.svg)](https://doi.org/10.5281/zenodo.22852340) [![Code DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21979028.svg)](https://doi.org/10.5281/zenodo.21979028) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![arXiv](https://img.shields.io/badge/arXiv-2609.30305-b31b1b.svg)](https://arxiv.org/abs/2609.30305) [![Paper DOI](https://img.shields.io/badge/Paper%20DOI-10.5281%2Fzenodo.22852340-blue.svg)](https://doi.org/10.5281/zenodo.22852340) [![Code DOI](https://img.shields.io/badge/Code%20DOI-10.5281%2Fzenodo.21979028-blue.svg)](https://doi.org/10.5281/zenodo.21979028) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 The paper is available as a preprint at [arXiv:2609.30305](https://arxiv.org/abs/2609.30305) and is also archived at [doi:10.5281/zenodo.22852340](https://doi.org/10.5281/zenodo.22852340). The code and data are archived at [doi:10.5281/zenodo.21979028](https://doi.org/10.5281/zenodo.21979028), which always resolves to the newest version.
 
