@@ -358,6 +358,10 @@ The **sum** of the turns is fixed at $`360^\circ`$, and the equal split at $`180
 
 **This branch did not pan out numerically, and no such solution is claimed here.** A 70 by 70 grid search over ball A, with pairing restricted to $`\Delta\psi_A < 180^\circ < \Delta\psi_B`$, found candidates with genuinely unequal turns, for example $`145^\circ`$ and $`215^\circ`$ at launch angles of $`6.3^\circ`$ and $`3.8^\circ`$ with a scaled residual of $`9.9\times10^{-3}`$. But every one of four independent seeds, refined by bounded least-squares, drained back to the near-symmetric degenerate corner at $`\theta \approx 1.1^\circ`$ and $`v_0 \approx 120\ \mathrm{m/s}`$ with turns of $`179^\circ`$ and $`181^\circ`$, stalling at a 1.5 to 2.0 mm miss. That residual floor is consistent with the $`\theta^2`$ law, meaning it is the same obstruction rather than a converged root. So no isolated finite-angle asymmetric solution was found, and the numerical evidence points against one existing in the region searched, but non-existence has not been proved. This is the one genuinely open question in the study.
 
+### When the coefficients vary
+
+The master identity does not need constant coefficients. If $`C_L`$ and $`C_D`$ change along the path, for example because $`C_L`$ depends on the spin parameter or $`C_D`$ drops through the drag crisis, then $`k_L`$ and $`k_D`$ become functions of the path length $`s`$ and the identity still holds at every point. The heading is then $`\psi(s) = \int_0^s k_L\,ds'`$ and the horizontal speed is $`v_h(s) = v_h(0)\exp(-\int_0^s k_D\,ds')`$. Drag still never enters the heading. Only the closed form is lost, because $`k_L`$ then depends on the speed and so on the vertical motion. `tests/test_variable_coefficients.py` checks both statements with a spin-dependent $`C_L`$ and with the drag crisis switched on.
+
 ## Novelty check
 
 The sports-aerodynamics, exterior-ballistics and projectile-motion literature was surveyed to establish what here is actually new. The picture is unusually clear, because the two canonical references for this exact configuration both state in print that no closed form exists.
@@ -436,7 +440,8 @@ Nothing was tuned, clamped or regularised to make any of these agree. Every solv
 ```bash
 pip install -r requirements.txt
 python run_all.py        # writes figures/*.pdf and results.json, prints every number above
-python -m pytest -q      # 139 regression tests
+python make_paper_figures.py  # writes figures/manuscript/*.pdf and prints every number the paper quotes
+python -m pytest -q      # 142 regression tests
 ```
 
 `run_all.py` takes a few minutes, dominated by the $`\mathrm{rtol} = 10^{-10}`$ event-detected solves in the parameter scans.
@@ -451,6 +456,8 @@ src/theory.py      the exact analytic structure and the asymmetric-collision sol
 src/reduced.py     reduction to one scalar ODE in the turn angle, and the deficit map
 src/sweep.py       symmetry checks, vectorised feasibility map, shape analysis, figures
 run_all.py         driver: runs everything and writes figures/ and results.json
-tests/             139 regression tests at machine-precision tolerances
+make_paper_figures.py  draws the manuscript figures into figures/manuscript/
+tests/             142 regression tests at machine-precision tolerances
 figures/           six PDF figures, matplotlib only, no seaborn styling
+figures/manuscript/  the figures used in the paper
 ```
