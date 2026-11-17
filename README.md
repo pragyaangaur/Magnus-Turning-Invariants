@@ -186,7 +186,7 @@ Converged solutions, drag on, $`v_0`$ capped at $`150\ \mathrm{m/s}`$:
 | pingpong | 0.667 | yes | $`80^\circ`$ | 90.952 | 2.376 | 3.9662 | 8.698 | 0.096 |
 | soccer | 1.000 | yes | $`76^\circ`$ | 124.204 | 23.321 | 9.5827 | 26.196 | 0.211 |
 | golf | 1.000 | no | | | | | | $`\psi_{\max} = 0.804\pi`$ |
-| tennis | 0.455 | no | | | | | | $`\psi_{\max} = 0.565\pi`$ |
+| tennis | 0.490 | no | | | | | | $`\psi_{\max} = 0.598\pi`$ |
 | baseball | 0.571 | no | | | | | | $`\psi_{\max} = 0.504\pi`$ |
 
 Golf and soccer share $`C_L/C_D = 1.0`$ yet only soccer closes, because feasibility depends on $`v_0/v_t`$ as well as the ratio, and the soccer ball's lower terminal velocity (26.9 versus 45.4 m/s) puts it at a higher $`v_0/v_t`$ for the same capped $`v_0`$. That dependence is exactly what the $`C_L/C_D = \pi`$ prediction leaves out.
@@ -198,7 +198,7 @@ For reference, the drag-free closure at $`45^\circ`$:
 | ball | $`C_L`$ | $`C_D`$ | $`L_L`$ (m) | $`v_0`$ (m/s) | $`R`$ (m) | $`t`$ (s) | $`v_f`$ (m/s) |
 |---|---|---|---|---|---|---|---|
 | baseball | 0.20 | 0.35 | 281.27 | 86.889 | 257.704 | 12.530 | 86.889 |
-| tennis | 0.25 | 0.55 | 106.88 | 53.561 | 97.925 | 7.724 | 53.561 |
+| tennis | 0.25 | 0.51 | 106.88 | 53.561 | 97.925 | 7.724 | 53.561 |
 | pingpong | 0.30 | 0.45 | 11.69 | 17.716 | 10.713 | 2.555 | 17.716 |
 | golf | 0.25 | 0.25 | 210.31 | 75.133 | 192.690 | 10.835 | 75.133 |
 | soccer | 0.25 | 0.25 | 73.87 | 44.529 | 67.684 | 6.422 | 44.529 |

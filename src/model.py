@@ -163,7 +163,7 @@ def v0_closed_form(theta_rad, p: Params):
 
 BALLS = {
     "baseball":   dict(mass_kg=0.145,  radius_m=0.0366, cl_const=0.20, cd_const=0.35),
-    "tennis":     dict(mass_kg=0.0577, radius_m=0.0335, cl_const=0.25, cd_const=0.55),
+    "tennis":     dict(mass_kg=0.0577, radius_m=0.0335, cl_const=0.25, cd_const=0.51),
     "pingpong":   dict(mass_kg=0.0027, radius_m=0.020,  cl_const=0.30, cd_const=0.45),
     "golf":       dict(mass_kg=0.0459, radius_m=0.0213, cl_const=0.25, cd_const=0.25),
     "soccer":     dict(mass_kg=0.430,  radius_m=0.110,  cl_const=0.25, cd_const=0.25),
