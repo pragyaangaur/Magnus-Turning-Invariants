@@ -2,6 +2,8 @@ cff-version: 1.2.0
 title: "Magnus Turning Invariants: exact turning invariants for projectile motion under quadratic drag and a vertical-axis Magnus force"
 message: "If you use this software or the results in it, please cite both the software archive and the paper."
 type: software
+version: "v1.2"
+date-released: "2026-11-17"
 authors:
   - family-names: Gaur
     given-names: Pragyaan
