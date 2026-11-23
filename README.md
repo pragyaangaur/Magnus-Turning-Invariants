@@ -18,8 +18,9 @@ The drag-free version has an exact and rather elegant solution. The version with
 4. [The analytic structure](#the-analytic-structure)
 5. [Novelty check](#novelty-check)
 6. [Summary of results](#summary-of-results)
-7. [Running it](#running-it)
-8. [Repository layout](#repository-layout)
+7. [Machine-checked proofs in Lean](#machine-checked-proofs-in-lean)
+8. [Running it](#running-it)
+9. [Repository layout](#repository-layout)
 
 ## Explain it simply
 
@@ -435,6 +436,31 @@ One caveat remains. The full text of McCoy's monograph and of several paywalled 
 
 Nothing was tuned, clamped or regularised to make any of these agree. Every solver raises `DivergedError` rather than returning an approximate result.
 
+## Machine-checked proofs in Lean
+
+The folder `lean/` holds a Lean 4 project that depends on [Physlib](https://physlib.io) and Mathlib. It proves the exact results of the paper, and Lean checks every step. No proof uses `sorry`, and the main theorems use only the three standard axioms of Lean.
+
+| File | What it proves |
+| --- | --- |
+| `Horizontal.lean` | The exact solution $`\zeta(t) = \zeta(0)\,e^{(i\kappa_L - \kappa_D)s(t)}`$, the turn rate $`\kappa_L s`$, the logarithmic spiral, the reversal path length $`\pi L_L`$ and the curvature identity behind $`R = L_L\cos\gamma`$ |
+| `Vertical.lean` | $`dQ/dt = -g/v_h`$, the reduced equation in chain-rule form, and the rate forms of the closure and chord equations |
+| `Integrals.lean` | The closure and chord equations as integrals over the heading |
+| `Rendezvous.lean` | The first integral, the antisymmetry $`Q(\pi-\psi) = -Q(\psi)`$ and $`I = 0`$ without drag, and the fact that drag breaks this antisymmetry |
+| `LaunchSpeed.lean` | $`v_0^2 = \pi g L_L / f(\theta)`$ and $`f(\theta) > 0`$ |
+| `SmallAngle.lean` | In the small-angle model, $`I > 0`$ for every $`\mu > 0`$, so the two balls miss for any drag |
+
+The proofs never change the independent variable from $`t`$ to $`s`$. They show instead that $`\zeta(t)\,e^{-(i\kappa_L - \kappa_D)s(t)}`$ has zero time derivative, so the result does not depend on that substitution.
+
+The small-angle result goes further than the perturbation result in the paper. With $`\sqrt{1+Q^2} \approx 1`$ the reduced equation has the solution $`Q = A + Be^{2\mu\psi}`$, and the proof shows that closure forces $`I > 0`$ for every $`\mu > 0`$. The key step is that $`h(a) = a(\pi^2+a^2)(e^{2a}+1) - (\pi^2+4a^2)(e^{2a}-1)`$ is positive for $`a > 0`$. Its fourth derivative is $`e^{2a}`$ times a cubic whose coefficients are positive because $`\pi^2 > 9`$. This is a statement about the linearised model. The full nonlinear case for all $`\mu`$ and $`\theta`$ is still open.
+
+To check the proofs:
+
+```bash
+cd lean
+lake exe cache get
+lake build
+```
+
 ## Running it
 
 ```bash
@@ -460,4 +486,5 @@ make_paper_figures.py  draws the manuscript figures into figures/manuscript/
 tests/             142 regression tests at machine-precision tolerances
 figures/           six PDF figures, matplotlib only, no seaborn styling
 figures/manuscript/  the figures used in the paper
+lean/              Lean 4 proofs of the exact results, built on Physlib and Mathlib
 ```
