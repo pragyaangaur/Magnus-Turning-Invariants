@@ -35,3 +35,6 @@ magnus_turning_invariants_code.zip
 
 # Journal correspondence and referee reports are confidential
 *reviewer_attachment*.pdf
+
+# Lean build output
+lean/.lake/
