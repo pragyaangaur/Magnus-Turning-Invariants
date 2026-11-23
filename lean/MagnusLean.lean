@@ -3,3 +3,4 @@ import MagnusLean.Vertical
 import MagnusLean.Integrals
 import MagnusLean.Rendezvous
 import MagnusLean.LaunchSpeed
+import MagnusLean.SmallAngle
